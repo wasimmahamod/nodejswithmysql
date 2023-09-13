@@ -9,6 +9,13 @@ const connection = mysql.createConnection({
     password: '', // Your database password
     database: 'node' // Your database name
 });
+connection.connect((err) => {
+    if (err) {
+        console.error('Error connecting to the database:', err);
+        return;
+    }
+    console.log('Connected to MySQL database');
+});
 app.use(express.json())
 app.post('/', (req, res) => {
     let {
@@ -26,36 +33,40 @@ app.post('/', (req, res) => {
         if (err) {
             console.error('Error inserting data:', err);
             return;
+        }else{
+            res.send(results);
         }
-        console.log('Data inserted successfully:', results);
     });
 })
 
-const recordIdToDelete = 1; // Replace with the ID of the record you want to delete
 
-connection.query('DELETE FROM users WHERE id = ?', [recordIdToDelete], (err, results) => {
-    if (err) {
-        console.error('Error deleting data:', err);
-        return;
-    }
-    console.log('Data deleted successfully:', results);
-});
-// Establish the connection
-connection.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-});
+app.delete('/',(req,res)=>{
+    let {id}=req.body;
+    const recordIdToDelete = id; // Replace with the ID of the record you want to delete
+    connection.query('DELETE FROM users WHERE id = ?', [recordIdToDelete], (err, results) => {
+        if (err) {
+            console.error('Error deleting data:', err);
+            return;
+        }else{
 
-connection.query('SELECT * FROM users', (err, results) => {
-    if (err) {
-        console.error('Error reading data:', err);
-        return;
-    }
-    console.log('Data retrieved successfully:', results);
-});
+            res.send({success:"Data deleted successfully: ",results});
+        }
+    });
+
+})
+
+app.get('/',(req,res)=>{
+    connection.query('SELECT * FROM users', (err, results) => {
+        if (err) {
+            console.error('Error reading data:', err);
+            return;
+        }
+        res.send({success:"Data retrieved successfully:",results});
+    });
+
+})
+
+
 
 
 app.listen(8000, function () {
